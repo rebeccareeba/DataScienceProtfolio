@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script type="text/javascript" src="../lib/d3.v5.min.js"></script>
+<style>
+  .pagebreak {
+    page-break-before: always; }
+
+  .legend rect {
+    fill:white;
+    stroke:black;
+    opacity:0.8;}
+  .line5 {
+    fill: none;
+    stroke:#ffc300;
+    stroke-width: 3;
+  }
+  .symbol5{
+    fill: #ffc300;
+    stroke:#ffc300;
+    stroke-width: 3;
+
+  }
+  .line6 {
+    fill: none;
+    stroke:#ff5733;
+    stroke-width: 3;
+  }
+  .symbol6 {
+    fill: #ff5733;
+    stroke:#ff5733;
+    stroke-width: 3;
+  }
+  .line7 {
+    fill: none;
+    stroke:#c70039;
+      troke-width: 3;
+  }
+
+  .symbol7 {
+    fill: #c70039;
+    stroke:#c70039;
+      troke-width: 3;
+  }
+
+  .line8 {
+    fill: none;
+    stroke:#900c3f;
+    stroke-width: 3;
+  }
+
+  .symbol8 {
+    fill: #900c3f;
+    stroke:#900c3f;
+    stroke-width: 3;
+  }
+  .overlay {
+    fill: none;
+    pointer-events: all;
+  }
+
+  /* Style the dots by assigning a fill and stroke */
+  .dot {
+    fill: #ffab00;
+    stroke: #fff;
+  }
+
+  .focus circle {
+    fill: none;
+    stroke: steelblue;
+  }
+</style>
+<body>
+  <div id="page1">
+<!-- your new page content -->
+</div>
+<div id="page2" style="display: block; page-break-before: always; ">
+<!-- your new page content -->
+</div>
+<script>
+  console.log("1")
+  var width_original = 1000,
+      height_original = 700;
+      // 2. Use the margin convention practice window.innerWidth window.innerHeight
+  var margin = {top: 100, right: 100, bottom: 80, left: 100}
+    ,width = 1000 - margin.left - margin.right // Use the window's width
+    ,height = 600 - margin.top - margin.bottom; // Use the window's height
+  console.log("2")
+      // parse the date / time
+  var parseTime = d3.timeParse("%Y");
+      // The number of datapoints
+  //var n = 16;
+  console.log("3")
+  // set the ranges
+  //var x = d3.scaleTime().range([0, width]);
+  //var y = d3.scaleLinear().range([height, 0]);
+
+  var	chart1 = d3.select("#page1")
+	              .append("svg")
+		              .attr("width", width + margin.left + margin.right)
+		              .attr("height", height + margin.top + margin.bottom)
+	              .append("g")
+		              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                 // Add one dot in the legend for each name.
+//  var size = 20
+  var keys = ["5_5.9",'6_6.9','7_7.9','8.0+']
+  var color = d3.scaleOrdinal()
+              .domain(keys)
+              .range(['#ffc300','#ff5733','#c70039','#900c3f']);
+  var size  = 20
+  chart1.selectAll("mydots")
+        .data(keys)
+          .enter()
+            .append("rect")
+              .attr("x", 800)
+              .attr("y", function(d,i){ return 50 + i*(size+5)}) // 100 is where the first dot appears. 25 is the distance between dots
+              .attr("width", size)
+              .attr("height", size)
+              .style("fill", function(d){ return color(d)})
+
+               // Add one dot in the legend for each name.
+  chart1.selectAll("mylabels")
+          .data(keys)
+            .enter()
+              .append("text")
+                .attr("x", 800 + size*1.2)
+                .attr("y", function(d,i){ return 50 + i*(size+5) + (size/2)}) // 100 is where the first dot appears. 25 is the distance between dots
+                .style("fill", function(d){ return color(d)})
+                .text(function(d){ return d})
+                .attr("text-anchor", "left")
+                .style("alignment-baseline", "middle")
+
+  //chart1.append("text")
+    //    .attr("transform", "rotate(-90)")
+    //    .attr("y", 0 – margin.left)
+    //    .attr("x",0 - (height / 2))
+    //    .attr("dy", "1em")
+    //    .style("text-anchor", "middle")
+    //    .text("Num of Earthquakes");
+
+  d3.csv("earthquakes.csv").then(function(data) {
+        // format the data
+        data.forEach(function(d) {
+          d.year = parseTime(d.year);
+          d["eight"] = +d["8.0+"];
+          d["seven"] = +d["7_7.9"];
+          d["six"] = +d["6_6.9"];
+          d["five"] = +d["5_5.9"];
+          d["deaths"] = +d["Estimated Deaths"];
+        });
+
+
+  //  var   legend = chart1.append("g")
+          //      .attr("class","legend")
+          //      .attr("transform","translate(50,30)")
+          //        .style("font-size","12px")
+          //          .call(d3.legend)
+  chart1.append("text")
+          .attr("x", (width/2))
+          .attr("y", 0 -(margin.top/3))
+          .attr("text-anchor", "middle")
+          .style("font-size", "25px")
+             //.style("text-decoration", "underline")
+          .text("Earthquake Statistics for 2000-2015");
+
+  chart1.append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("x", 0 - (height / 2))
+          .attr("y", 0 - (margin.left/2) )
+          .attr("text-anchor", "middle")
+          .style("font-size", "20px")
+                  //.style("text-decoration", "underline")
+          .text("Num of Earthquakes");
+
+              // text label for the x axis
+  chart1.append("text")
+          .attr("transform",
+                "translate(" + (width/2) + " ," +
+                                 (height  + 40) + ")")
+          .style("text-anchor", "middle")
+          .style("font-size", "20px")
+          .text("Year");
+        // Add X axis --> it is a date format
+  var xScale = d3.scaleTime()
+                .domain(d3.extent(data, function(d) { return d.year; }))
+                .range([0, width]);
+
+  chart1.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(xScale));
+
+
+
+              // Add Y axis
+  var yScale = d3.scaleLinear()
+                .domain([0, d3.max(data, function(d) { return +d.five; })])
+                .range([ height, 0 ]);
+  chart1.append("g")
+          .call(d3.axisLeft(yScale));
+
+
+
+  var line5 = d3.line()
+                .x(function(d, i) { return xScale(d.year); }) // set the x values for the line generator
+                .y(function(d) { return yScale(d["five"]); }) // set the y values for the line generator
+                .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+  var line6 = d3.line()
+                .x(function(d, i) { return xScale(d.year); }) // set the x values for the line generator
+                .y(function(d) { return yScale(d["six"]); }) // set the y values for the line generator
+                .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+  var line7 = d3.line()
+                .x(function(d, i) { return xScale(d.year); }) // set the x values for the line generator
+                .y(function(d) { return yScale(d["seven"]); }) // set the y values for the line generator
+                .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+  var line8 = d3.line()
+                .x(function(d, i) { return xScale(d.year); }) // set the x values for the line generator
+                .y(function(d) { return yScale(d["eight"]); }) // set the y values for the line generator
+                .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+      // 9. Append the path, bind the data, and call the line generator
+  chart1.append("path")
+          .datum(data) // 10. Binds data to the line
+          .attr("class", "line5") // Assign a class for styling
+          .attr("d", line5); // 11. Calls the line generator
+
+  chart1.append("path")
+          .datum(data) // 10. Binds data to the line
+          .attr("class", "line6") // Assign a class for styling
+          .attr("d", line6); // 11. Calls the line generator
+
+  chart1.append("path")
+          .datum(data) // 10. Binds data to the line
+          .attr("class", "line7") // Assign a class for styling
+          .attr("d", line7); // 11. Calls the line generator
+
+
+  chart1.append("path")
+          .datum(data) // 10. Binds data to the line
+          .attr("class", "line8") // Assign a class for styling
+          .attr("d", line8); // 11. Calls the line generator
+
+//
+  var	chart2 = d3.select("#page1")
+                  .append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  chart2.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(xScale));
+
+
+  chart2.append("g")
+          .call(d3.axisLeft(yScale));
+
+  chart2.selectAll("mydots")
+          .data(keys)
+            .enter()
+            .append("rect")
+              .attr("x", 800)
+              .attr("y", function(d,i){ return 50 + i*(size+5)}) // 100 is where the first dot appears. 25 is the distance between dots
+              .attr("width", size)
+              .attr("height", size)
+              .style("fill", function(d){ return color(d)})
+
+                       // Add one dot in the legend for each name.
+  chart2.selectAll("mylabels")
+                  .data(keys)
+                    .enter()
+                      .append("text")
+                        .attr("x", 800 + size*1.2)
+                        .attr("y", function(d,i){ return 50 + i*(size+5) + (size/2)}) // 100 is where the first dot appears. 25 is the distance between dots
+                        .style("fill", function(d){ return color(d)})
+                        .text(function(d){ return d})
+                        .attr("text-anchor", "left")
+                        .style("alignment-baseline", "middle")
+
+  chart2.append("text")
+          .attr("x", (width/2))
+          .attr("y", 0 -(margin.top/3))
+          .attr("text-anchor", "middle")
+          .style("font-size", "25px")
+          //.style("text-decoration", "underline")
+          .text("Earthquake Statistics for 2000-2015 with Symbols");
+
+  chart2.append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("x", 0 - (height / 2))
+          .attr("y", 0 - (margin.left/2) )
+          .attr("text-anchor", "middle")
+          .style("font-size", "20px")
+          //.style("text-decoration", "underline")
+          .text("Num of Earthquakes");
+
+// text label for the x axis
+  chart2.append("text")
+          .attr("transform",
+                  "translate(" + (width/2) + " ," +
+                              (height  + 40) + ")")
+          .style("text-anchor", "middle")
+          .style("font-size", "20px")
+          .text("Year");
+
+
+// 9. Append the path, bind the data, and call the line generator
+  chart2.append("path")
+          .datum(data) // 10. Binds data to the line
+          .attr("class", "line5") // Assign a class for styling
+          .attr("d", line5); // 11. Calls the line generator
+
+  chart2.append("path")
+          .datum(data) // 10. Binds data to the line
+          .attr("class", "line6") // Assign a class for styling
+          .attr("d", line6); // 11. Calls the line generator
+
+  chart2.append("path")
+          .datum(data) // 10. Binds data to the line
+          .attr("class", "line7") // Assign a class for styling
+          .attr("d", line7); // 11. Calls the line generator
+
+
+  chart2.append("path")
+          .datum(data) // 10. Binds data to the line
+          .attr("class", "line8") // Assign a class for styling
+          .attr("d", line8); // 11. Calls the line generator
+//Add symbols to the graph
+  const circle = d3.symbol().type(d3.symbolCircle).size(function(d){return d.deaths/400})
+  const triangle = d3.symbol().type(d3.symbolTriangle ).size(function(d){return d.deaths/400})
+  const diamond = d3.symbol().type(d3.symbolDiamond ).size(function(d){return d.deaths/400})
+  const square = d3.symbol().type(d3.symbolSquare ).size(function(d){return d.deaths/400})
+
+//Bind the data to the symbols in chart2
+  chart2.selectAll("circles")
+          .data(data)
+          .enter()
+          .append("path")
+          .attr("class", 'symbol5')
+          .attr("d",circle)
+          .attr("transform", function(d) { return "translate(" + xScale(d.year) + "," + yScale(d.five) + ")";
+          })
+
+  chart2.selectAll("triangles")
+          .data(data)
+            .enter()
+            .append("path")
+              .attr("class", 'symbol6')
+              .attr("d",triangle)
+              .attr("transform", function(d) { return "translate(" + xScale(d.year) + "," + yScale(d.six) + ")";
+              })
+
+  chart2.selectAll("diamonds")
+          .data(data)
+            .enter()
+            .append("path")
+            .attr("class", 'symbol7')
+            .attr("d",diamond)
+            .attr("transform", function(d) { return "translate(" + xScale(d.year) + "," + yScale(d.seven) + ")";
+            })
+
+  chart2.selectAll("squares")
+          .data(data)
+          .enter()
+          .append("path")
+          .attr("class", 'symbol8')
+          .attr("d",square)
+          .attr("transform", function(d) { return "translate(" + xScale(d.year) + "," + yScale(d.eight) + ")";
+          })
+
+
+          //function(d) {
+          //          return "translate(" + x(d.year) +
+          //                            "," + y(d.five) + ")";
+          //          })
+        //  .size(function(d){ return sizeScale(d[0]);}))
+        //                                .style("fill", function(d){ return symbolcolor(d[0]) ;})
+        //                                .attr("transform", function(d) { return "translate("+xScale(d[0])+","+yScale(d[1])+")"; });
+
+    var	chart3 = d3.select("#page2")
+                    .append("svg")
+                      .attr("width", width + margin.left + margin.right)
+                      .attr("height", height + margin.top + margin.bottom)
+                      .append("g")
+                      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    chart3.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(xScale));
+
+    var yScaleSqrt = d3.scaleSqrt()
+                  .domain([0, d3.max(data, function(d) { return +d.five; })])
+                  .range([ height, 0 ]);
+
+    chart3.append("g")
+            .call(d3.axisLeft(yScaleSqrt));
+
+    chart3.selectAll("mydots")
+            .data(keys)
+            .enter()
+            .append("rect")
+              .attr("x", 800)
+              .attr("y", function(d,i){ return 150 + i*(size+5)}) // 100 is where the first dot appears. 25 is the distance between dots
+              .attr("width", size)
+              .attr("height", size)
+              .style("fill", function(d){ return color(d)})
+
+                                 // Add one dot in the legend for each name.
+    chart3.selectAll("mylabels")
+            .data(keys)
+            .enter()
+              .append("text")
+              .attr("x", 800 + size*1.2)
+              .attr("y", function(d,i){ return 150 + i*(size+5) + (size/2)}) // 100 is where the first dot appears. 25 is the distance between dots
+              .style("fill", function(d){ return color(d)})
+              .text(function(d){ return d})
+              .attr("text-anchor", "left")
+              .style("alignment-baseline", "middle")
+
+    chart3.append("text")
+            .attr("x", (width/2))
+            .attr("y", 0 -(margin.top/3))
+            .attr("text-anchor", "middle")
+            .style("font-size", "25px")
+                    //.style("text-decoration", "underline")
+            .text("Earthquake statistics for 2000-2015 (Square root Scale)");
+
+    chart3.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("x", 0 - (height / 2))
+            .attr("y", 0 - (margin.left/2) )
+            .attr("text-anchor", "middle")
+            .style("font-size", "20px")
+                    //.style("text-decoration", "underline")
+            .text("Num of Earthquakes");
+
+            // text label for the x axis
+    chart3.append("text")
+            .attr("transform",
+                    "translate(" + (width/2) + " ," +
+                                        (height  + 40) + ")")
+            .style("text-anchor", "middle")
+            .style("font-size", "20px")
+            .text("Year");
+
+
+
+    var Sqrtline5 = d3.line()
+                    .x(function(d, i) { return xScale(d.year); }) // set the x values for the line generator
+                    .y(function(d) { return yScaleSqrt(d["five"]); }) // set the y values for the line generator
+                    .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+    var Sqrtline6 = d3.line()
+                    .x(function(d, i) { return xScale(d.year); }) // set the x values for the line generator
+                    .y(function(d) { return yScaleSqrt(d["six"]); }) // set the y values for the line generator
+                    .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+    var Sqrtline7 = d3.line()
+                    .x(function(d, i) { return xScale(d.year); }) // set the x values for the line generator
+                    .y(function(d) { return yScaleSqrt(d["seven"]); }) // set the y values for the line generator
+                    .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+    var Sqrtline8 = d3.line()
+                    .x(function(d, i) { return xScale(d.year); }) // set the x values for the line generator
+                    .y(function(d) { return yScaleSqrt(d["eight"]); }) // set the y values for the line generator
+                    .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+                // 9. Append the path, bind the data, and call the line generator
+    chart3.append("path")
+            .datum(data) // 10. Binds data to the line
+            .attr("class", "line5") // Assign a class for styling
+            .attr("d", Sqrtline5); // 11. Calls the line generator
+
+    chart3.append("path")
+            .datum(data) // 10. Binds data to the line
+            .attr("class", "line6") // Assign a class for styling
+            .attr("d", Sqrtline6); // 11. Calls the line generator
+
+    chart3.append("path")
+            .datum(data) // 10. Binds data to the line
+            .attr("class", "line7") // Assign a class for styling
+            .attr("d", Sqrtline7); // 11. Calls the line generator
+
+
+    chart3.append("path")
+            .datum(data) // 10. Binds data to the line
+            .attr("class", "line8") // Assign a class for styling
+            .attr("d", Sqrtline8); // 11. Calls the line generator
+
+
+      //Bind the data to the symbols in chart2
+    chart3.selectAll("sqcircles")
+                      .data(data)
+                      .enter()
+                      .append("path")
+                      .attr("class", 'symbol5')
+                      .attr("d",circle)
+                      .attr("transform", function(d) { return "translate(" + xScale(d.year) + "," + yScaleSqrt(d.five) + ")";
+                      })
+
+    chart3.selectAll("sqtriangles")
+            .data(data)
+            .enter()
+            .append("path")
+            .attr("class", 'symbol6')
+            .attr("d",triangle)
+            .attr("transform", function(d) { return "translate(" + xScale(d.year) + "," + yScaleSqrt(d.six) + ")";
+            })
+
+    chart3.selectAll("sqdiamonds")
+            .data(data)
+            .enter()
+            .append("path")
+            .attr("class", 'symbol7')
+            .attr("d",diamond)
+            .attr("transform", function(d) { return "translate(" + xScale(d.year) + "," + yScaleSqrt(d.seven) + ")";
+                        })
+
+    chart3.selectAll("sqsquares")
+            .data(data)
+            .enter()
+            .append("path")
+            .attr("class", 'symbol8')
+            .attr("d",square)
+            .attr("transform", function(d) { return "translate(" + xScale(d.year) + "," + yScaleSqrt(d.eight) + ")";
+          })
+
+
+
+    var	chart4 = d3.select("#page2")
+              .append("svg")
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    chart4.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(xScale));
+
+    var yScaleLog = d3.scaleLog()
+                    .base(10)
+                    .domain([.9, d3.max(data, function(d)
+                      { return +d.five; })])
+                    .range([ height, 0 ]);
+
+  //  var y0 = d3.scaleOrdinal()
+          //    .domain([0])
+          //    .range([height])
+
+    chart4.append("g")
+            .call(d3.axisLeft(yScaleLog))
+            //.ticks(20, d3.format(",.1s"));
+
+    //chart4.append("g")
+            //.call(d3.axisLeft(y0))
+
+    //chart4.append("g")
+            //.call(d3.axisLeft(y0));
+    chart4.selectAll("mydots")
+            .data(keys)
+            .enter()
+            .append("rect")
+            .attr("x", 800)
+            .attr("y", function(d,i){ return 40 + i*(size+5)}) // 100 is where the first dot appears. 25 is the distance between dots
+            .attr("width", size)
+            .attr("height", size)
+            .style("fill", function(d){ return color(d)})
+
+                                           // Add one dot in the legend for each name.
+    chart4.selectAll("mylabels")
+            .data(keys)
+            .enter()
+            .append("text")
+            .attr("x", 800 + size*1.2)
+            .attr("y", function(d,i){ return 40 + i*(size+5) + (size/2)}) // 100 is where the first dot appears. 25 is the distance between dots
+            .style("fill", function(d){ return color(d)})
+            .text(function(d){ return d})
+            .attr("text-anchor", "left")
+            .style("alignment-baseline", "middle")
+
+    chart4.append("text")
+            .attr("x", (width/2))
+            .attr("y", 0 -(margin.top/3))
+            .attr("text-anchor", "middle")
+            .style("font-size", "25px")
+                              //.style("text-decoration", "underline")
+            .text("Earthquake statistics for 2000-2015 (Log Scale)");
+
+    chart4.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("x", 0 - (height / 2))
+            .attr("y", 0 - (margin.left/2) )
+            .attr("text-anchor", "middle")
+            .style("font-size", "20px")
+                              //.style("text-decoration", "underline")
+            .text("Num of Earthquakes");
+
+                      // text label for the x axis
+    chart4.append("text")
+            .attr("transform",
+                      "translate(" + (width/2) + " ," +
+                                                  (height  + 40) + ")")
+            .style("text-anchor", "middle")
+            .style("font-size", "20px")
+            .text("Year");
+
+
+
+    var Logline5 = d3.line()
+                    .x(function(d, i) { return xScale(d.year); }) // set the x values for the line generator
+                    .y(function(d) {//return yScaleLog(d["five"]);})
+                      if (d["five"]>=1){return yScaleLog(d["five"])}
+                      else{return yScaleLog(.9)}
+                    }) // set the y values for the line generator
+                    .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+    var Logline6 = d3.line()
+                    .x(function(d, i) { return xScale(d.year); }) // set the x values for the line generator
+                    .y(function(d) {// return yScaleSqrt(d["six"]); })
+                      if (d["six"]>=1){return yScaleLog(d["six"])}
+                    else{return yScaleLog(.9)}
+                      })
+                    .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+    var Logline7 = d3.line()
+                    .x(function(d, i) { return xScale(d.year); }) // set the x values for the line generator
+                    .y(function(d) {// return yScaleSqrt(d["seven"]); }) // set the y values for the line generator
+                      if (d["seven"]>=1){return yScaleLog(d["seven"])}
+                      else{return yScaleLog(.9)}
+                    })
+                    .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+    var Logline8 = d3.line()
+                    .x(function(d, i) { return xScale(d.year); }) // set the x values for the line generator
+                    .y(function(d) { //return yScaleSqrt(d["eight"]); }) // set the y values for the line generator
+                      if (d["eight"]>=1){return yScaleLog(d["eight"])}
+                      else{return yScaleLog(.9)}
+                    })
+                    .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+                          // 9. Append the path, bind the data, and call the line generator
+    chart4.append("path")
+            .datum(data) // 10. Binds data to the line
+            .attr("class", "line5") // Assign a class for styling
+            .attr("d", Logline5); // 11. Calls the line generator
+
+    chart4.append("path")
+            .datum(data) // 10. Binds data to the line
+            .attr("class", "line6") // Assign a class for styling
+            .attr("d", Logline6); // 11. Calls the line generator
+
+    chart4.append("path")
+            .datum(data) // 10. Binds data to the line
+            .attr("class", "line7") // Assign a class for styling
+            .attr("d", Logline7); // 11. Calls the line generator
+
+
+    chart4.append("path")
+            .datum(data) // 10. Binds data to the line
+            .attr("class", "line8") // Assign a class for styling
+            .attr("d", Logline8); // 11. Calls the line generator
+
+
+                //Bind the data to the symbols in chart2
+    chart4.selectAll("logcircles")
+            .data(data)
+            .enter()
+            .append("path")
+            .attr("class", 'symbol5')
+            .attr("d",circle)
+            .attr("transform", function(d) {
+              if(d.five>=1){return "translate(" + xScale(d.year) + "," + yScaleLog(d.five) + ")";}
+              else{return "translate(" + xScale(d.year) + "," + yScaleLog(.9) + ")";}
+            })
+
+    chart4.selectAll("logtriangles")
+            .data(data)
+            .enter()
+            .append("path")
+            .attr("class", 'symbol6')
+            .attr("d",triangle)
+            .attr("transform", function(d) {
+              if(d.six>=1){return "translate(" + xScale(d.year) + "," + yScaleLog(d.six) + ")";}
+              else{return "translate(" + xScale(d.year) + "," + yScaleLog(.9) + ")";}
+            })
+
+    chart4.selectAll("logdiamonds")
+                        .data(data)
+                        .enter()
+                        .append("path")
+                        .attr("class", 'symbol7')
+                        .attr("d",diamond)
+                        .attr("transform", function(d) {
+                            if(d.seven>=1){return "translate(" + xScale(d.year) + "," + yScaleLog(d.seven) + ")";}
+                            else{return "translate(" + xScale(d.year) + "," + yScaleLog(.9) + ")";}
+                         })
+
+    chart4.selectAll("logsquares")
+                        .data(data)
+                        .enter()
+                        .append("path")
+                        .attr("class", 'symbol8')
+                        .attr("d",square)
+                        .attr("transform", function(d) {
+                          if(d.eight>=1){return "translate(" + xScale(d.year) + "," + yScaleLog(d.eight) + ")";}
+                          else{return "translate(" + xScale(d.year) + "," + yScaleLog(.9) + ")";}
+                      })
+    chart4.append("text")
+            .attr("x", (width -60))
+            .attr("y", 0 + height + margin.top/1.5  )
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .text("rpatro6");
+        //
+  console.log(data[0]);
+  });
+
+    console.log("4")
+</script>
+</body>
+</html>

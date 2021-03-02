@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script type="text/javascript" src="../lib/d3.v5.min.js"></script>
+    <script type="text/javascript" src="../lib/topojson.v2.min.js"></script>
+    <script type="text/javascript" src="../lib/d3-simple-slider.min.js"></script>
+    <script type="text/javascript" src="../lib/d3-tip.min.js"></script>
+    <style type="text/css">
+      body {
+	        margin: auto;
+	        width: 650px;
+	        font: 12px arial;
+         }
+
+    </style>
+  </head>
+
+  <body>
+    Select year:
+
+    <select id="year"  ></select>
+
+    <svg id="chart" width="1000" height="500"></svg>
+
+
+
+  <script>
+
+  d3.csv("earthquake.csv").then(d => chart(d))
+  var year_svg = d3.select("#year").append("svg")
+                .attr("width", 200)
+                .attr("height", 50);
+  function chart(csv) {
+
+  	var keys = csv.columns.slice(2);
+
+  	var year   = [...new Set(csv.map(d => d.Year))]
+  	var states = [...new Set(csv.map(d => d.State))]
+
+  	var options = d3.select("#year").selectAll("option")
+  		              .data(year)
+  	                .enter().append("option")
+  		              .text(d => d)
+
+  	var svg = d3.select("#chart"),
+  		margin = {top: 50, left: 60, bottom: 10, right: 100},
+  		width = +svg.attr("width") - margin.left - margin.right,
+  		height = +svg.attr("height") - margin.top - margin.bottom;
+
+  	var x = d3.scaleBand()
+  		          .range([margin.left, width - margin.right])
+  		          .padding(0.1)
+
+  	var y = d3.scaleLinear()
+  		.rangeRound([height - margin.bottom, margin.top])
+
+  	var xAxis = svg.append("g")
+  		.attr("transform", `translate(0,${height - margin.bottom})`)
+  		.attr("class", "x-axis")
+
+  	var yAxis = svg.append("g")
+  		.attr("transform", `translate(${margin.left},0)`)
+  		.attr("class", "y-axis")
+
+  	var z = d3.scaleOrdinal()
+  		        .range(["#b33040", " #d25c4d", "#f2b447"])
+  		        .domain(keys);
+    console.log(keys)
+
+    svg.append("text")
+        .attr("x", (width/2))
+        .attr("y", (margin.top/2))
+        .attr("text-anchor", "middle")
+        .style("font-size", "20px")
+                         //.style("text-decoration", "underline")
+        .text("Visualizing Earthquake Counts by State");
+
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", 0 - (height / 2))
+        .attr("y", 20 )
+        .attr("text-anchor", "middle")
+        .style("font-size", "15px")
+                              //.style("text-decoration", "underline")
+        .text("Num of Earthquakes");
+
+                          // text label for the x axis
+    svg.append("text")
+          .attr("transform",
+                  "translate(" + (width/2) + " ," +
+                             (height  + 25) + ")")
+          .style("text-anchor", "middle")
+          .style("font-size", "15px")
+          .text("State");
+
+    svg.append("text")
+        .attr("transform",
+            "translate(" + (width - 100) + " ," +
+                (height  + 40) + ")")
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .text("rpatro6");
+
+          var size = 20
+          svg.selectAll("dots")
+                  .data(keys)
+                    .enter()
+                    .append("circle")
+                      .attr("cx", 700)
+                      .attr("cy", function(d,i){ return 70 + i*(size+5)}) // 100 is where the first dot appears. 25 is the distance between dots
+                      .attr("r", size/3)
+                      .style("fill", function(d){ return z(d)})
+
+                               // Add one dot in the legend for each name.
+          svg.selectAll("labels")
+                          .data(keys)
+                            .enter()
+                              .append("text")
+                                .attr("x", 700 + size/1.5)
+                                .attr("y", function(d,i){ return 60 + i*(size+5) + (size/2)}) // 100 is where the first dot appears. 25 is the distance between dots
+                                .style("fill", "#000")
+                                .text(function(d){ return d})
+                                .attr("text-anchor", "left")
+                                .style("alignment-baseline", "middle")
+
+  	update(d3.select("#year").property("value"), 0)
+
+  	function update(input, speed) {
+
+  		var data = csv.filter(f => f.Year == input)
+
+  		data.forEach(function(d) {
+  			d.total = d3.sum(keys, k => +d[k])
+  			return d
+  		})
+
+  		y.domain([0, d3.max(data, d => d3.sum(keys, k => +d[k]))]).nice();
+
+  		svg.selectAll(".y-axis").transition().duration(speed)
+  			.call(d3.axisLeft(y).ticks(null, "s"))
+
+  	//	data.sort(d3.select("#sort").property("checked")
+  	//		? (a, b) => b.total - a.total
+  	//		: (a, b) => states.indexOf(a.State) - states.indexOf(b.State))
+
+  		x.domain(data.map(d => d.State));
+
+  		svg.selectAll(".x-axis").transition().duration(speed)
+  			.call(d3.axisBottom(x).tickSizeOuter(0))
+
+  		var group = svg.selectAll("g.layer")
+  			.data(d3.stack().keys(keys)(data), d => d.key)
+
+  		group.exit().remove()
+
+  		group.enter().append("g")
+  			.classed("layer", true)
+  			.attr("fill", d => z(d.key));
+
+  		var bars = svg.selectAll("g.layer").selectAll("rect")
+  			.data(d => d, e => e.data.State);
+
+  		bars.exit().remove()
+
+  		bars.enter().append("rect")
+  			.attr("width", x.bandwidth())
+  			.merge(bars)
+  		.transition().duration(speed)
+  			.attr("x", d => x(d.data.State))
+  			.attr("y", d => y(d[1]))
+  			.attr("height", d => y(d[0]) - y(d[1]))
+
+  		var text = svg.selectAll(".text")
+  			.data(data, d => d.State);
+
+  		text.exit().remove()
+
+  		text.enter().append("text")
+  			.attr("class", "text")
+  			.attr("text-anchor", "middle")
+  			.merge(text)
+  		.transition().duration(speed)
+  			.attr("x", d => x(d.State) + x.bandwidth() / 2)
+  			.attr("y", d => y(d.total) - 5)
+  			.text(d => d.total)
+  	}
+
+  	var select = d3.select("#year")
+  		.on("change", function() {
+  			update(this.value, 750)
+  		})
+
+  	//var checkbox = d3.select("#sort")
+  		//.on("click", function() {
+  		//	update(select.property("value"), 750)
+  	//	})
+  }
+
+
+  </script>
+
+  </body>
+</html>

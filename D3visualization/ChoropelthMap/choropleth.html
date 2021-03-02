@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<script type="text/javascript" src="../lib/d3.v5.min.js"></script>
+	<script type="text/javascript" src="../lib/topojson.v2.min.js"></script>
+	<script type="text/javascript" src="../lib/d3-simple-slider.min.js"></script>
+	<script type="text/javascript" src="../lib/d3-tip.min.js"></script>
+	<style type="text/css">
+
+	.d3-tip {
+				line-height: 1;
+				padding: 6px;
+				background: rgba(0, 0, 0, 0.8);
+				color: #fff;
+				border-radius: 4px;
+				font-size: 12px;
+			}
+
+/* Creates a small triangle extender for the tooltip */
+	.d3-tip:after {
+				box-sizing: border-box;
+				display: inline;
+				font-size: 10px;
+				width: 100%;
+				line-height: 1;
+				color: rgba(0, 0, 0, 0.8);
+				content: "\25BC";
+				position: absolute;
+				text-align: center;
+			}
+
+			/* Style northward tooltips specifically */
+	.d3-tip.n:after {
+				margin: -2px 0 0 0;
+				top: 100%;
+				left: 0;
+			}
+/* Legend Font Style */
+		body {
+			font: 11px sans-serif;
+			background-color: #ffffff;
+		}
+
+	/* Legend Position Style */
+		.legend {
+			position:absolute;
+			left:20px;
+			top:30px;
+		}
+
+		.axis text {
+			font: 10px sans-serif;
+		}
+
+		.axis line, .axis path {
+			fill: none;
+			stroke: #000;
+			shape-rendering: crispEdges;
+		}
+    states {
+      fill: none;
+      stroke: #756bb1;
+      stroke-linejoin: round;
+    }
+		.state-borders {
+		  fill: none;
+		  stroke: #756bb1;
+		  stroke-width: 0.5px;
+		  stroke-linejoin: round;
+		  stroke-linecap: round;
+		  pointer-events: none;
+		}
+		path {
+  		stroke: #666;
+  		fill: none;
+  		fill-opacity: .9;
+  		stroke-width: 1px;
+  		stroke-linecap: round;
+  		stroke-linejoin: round;
+			}
+		</style>
+	</head>
+<body>
+
+
+  <div class="col-sm"><div id="slider-time"></div></div>
+
+
+	<div id="chart1"></div>
+  <script>
+
+
+	// Time
+	d3.select('div#slider-time')
+		.append('svg')
+			.attr('width', 80)
+			.attr('height', 100)
+			.append("text")
+				.attr("x",60)
+				.attr("y", 35 )
+				.attr("text-anchor", "middle")
+				.style("font-size", "20px")
+				.text("Year");
+		var dataTime = d3.range(0, 6).map(function(d) {
+											return new Date(2010 + d, 10, 3);
+											});
+
+		var sliderTime = d3.sliderBottom()
+												.min(d3.min(dataTime))
+												.max(d3.max(dataTime))
+												.step(1000 * 60 * 60 * 24 * 365)
+												.width(300)
+												.tickFormat(d3.timeFormat('%Y'))
+												.tickValues(dataTime)
+												.default(new Date(1998, 10, 3))
+												.on('onchange', val => {
+														d3.select('p#value-time').text(d3.timeFormat('%Y')(val));
+												})
+												.on('onchange', function() {
+														console.log("trial")
+														//console.log(val)
+														//year = d3.text(d3.timeFormat('%Y')(val))
+														return update();
+												});
+
+		var gTime = d3.select('div#slider-time')
+									.append('svg')
+									.attr('width', 500)
+									.attr('height', 100)
+									.append('g')
+									.attr('transform', 'translate(50,30)');
+								//	.on("input", function() {
+							   //     update(this.value);
+							    //});
+		gTime.call(sliderTime);
+//console.log(d3.timeFormat('%Y')(sliderTime.value()))
+		//d3.select('p#value-time').text(d3.timeFormat('%Y')(sliderTime.value()));
+
+    var width = 960;
+		var height = 500;
+    var lowColor = '#f9f9f9'
+		var highColor = '#bc2a66'
+
+
+
+    var promises = [
+							d3.json("states-10m.json"),//, function(us){//],
+							d3.csv("state-earthquakes.csv")//, function(d) {
+						]
+
+		var svg = d3.select("#chart1").append("svg")
+								.attr("width", width)
+								.attr("height", height);
+
+						//var stateNames = d3.map();
+		var projection = d3.geoAlbersUsa()
+												.translate([width / 2, height / 2]) // translate to center of screen
+												.scale([1000]); // scale things down so see entire US
+
+							// Define path generator
+		var path = d3.geoPath() // path generator that will convert GeoJSON to SVG paths
+									.projection(projection); // tell path generator to use albersUsa projection
+
+//////////// TOOL TIP CREATION
+	// create a tooltip
+
+    //console.log(promises)
+    Promise.all(promises).then(ready)
+			function ready([us,d]) {
+				//console.log(us)
+
+				var dataArray = [];
+				//console.log(data)
+				for (var i = 0; i < d.length; i++) {
+						//console.log(data[d]["2010"])
+						dataArray.push(parseFloat(d[i]["2010"]))
+						}
+						console.log(dataArray)
+				//console.log(dataArray)
+				var minVal = d3.min(dataArray)
+				//console.log(minVal)
+				var maxVal = d3.max(dataArray)
+				console.log(maxVal)
+
+				const logScale = d3.scaleLog()
+														.domain([1,maxVal])
+
+				const colorScaleLog = d3.scaleSequential(
+																(d) => d3.interpolateReds(logScale(d))
+																)
+				//LOG SCALE
+				console.log(d)
+      	// Grab data value
+				for (var i = 0; i < d.length; i++) {
+					var dataState = d[i]["States"];
+					//console.log(dataState)
+					// Grab data value
+					var dataValue = +d[i]['2010']//,+d[i]['2011'],+d[i]['2012'],+d[i]['2013'],+d[i]['2014'],+d[i]['2015']];
+					var dataRegion = d[i]['Region']
+					console.log(dataRegion)
+					var Year = "2010"
+					// Find the corresponding state inside the GeoJSON
+					for (var j = 0; j < us.objects.states.geometries.length; j++) {
+
+					 	var jsonState = us.objects.states.geometries[j].properties.name;
+
+						if (dataState == jsonState) {
+
+							us.objects.states.geometries[j].properties.value = dataValue;
+							us.objects.states.geometries[j].properties.region = dataRegion
+							//json.features[j].properties.value = dataValue;
+
+							// Stop looking through the JSON
+							break;
+						}
+					}
+				}
+				console.log(us)
+				var tool_tip = d3.tip()
+											.attr("class", "d3-tip")
+											.offset([-3, 0])
+											.html(function(d) { return "State: " + d.properties.name +"<br/>"  +"Reqion: " + d.properties.region +"<br/>"  +	"Year: 2010" +"<br/>"  +"Earthquakes: " + d.properties.value ; });
+				svg.call(tool_tip);
+
+  			svg.append("g")
+      			.attr("class", "states")
+    				.selectAll("path")
+    				.data(topojson.feature(us, us.objects.states).features)
+    				.enter().append("path")
+      			.attr("d", path)
+						.style("fill", function(d) {
+							//if (d.properties.value[0]){
+								return colorScaleLog(d.properties.value) })
+						.on('mouseover', tool_tip.show)
+						.on('mouseout', tool_tip.hide);
+
+
+
+    				//.append("title")
+      			//.text(function(d) { return d["2010"] ; });
+						var size = 20
+						minlog = Math.log(1)
+						maxlog = Math.log(maxVal)
+						//console.log(maxlog )
+						function log_split(a, b) {
+    							var result = [],
+        							delta = (b - a) / (8);
+    							while (a <b) {
+        							result.push(a);
+        							a += delta;
+    							}
+    							result.push(b);
+
+    							return result;
+								};
+						var log_legend = log_split(minlog, maxlog)
+						//console.log(log_legend)
+						function antilog_floor(arr){
+							return arr.map(function(x){
+								return Math.floor(Math.pow(Math.E,x))
+							});
+						}
+						var log_domain = antilog_floor(log_legend)
+
+						//var log_domain=[1, 2, 5, 10, 30, 70, 180, 500, 1000]
+						svg.selectAll("legends")
+					        .data(log_domain)
+					          .enter()
+					            .append("rect")
+					              .attr("x", 870)
+					              .attr("y", function(d,i){
+													//console.log(i)
+													 return 150 + i*(size+5)}) // 100 is where the first dot appears. 25 is the distance between dots
+					              .attr("width", size)
+					              .attr("height", size)
+					              .style("fill", function(d){
+													//console.log(d)
+													return colorScaleLog(d)})
+
+					               // Add one dot in the legend for each name.
+					  svg.selectAll("legendlabels")
+					          .data(log_domain)
+					            .enter()
+					              .append("text")
+					                .attr("x", 870 + size*1.2)
+					                .attr("y", function(d,i){ return 150 + i*(size+5) + (size/2)}) // 100 is where the first dot appears. 25 is the distance between dots
+					                //.style("fill", function(d){ return color(d)})
+					                .text(function(d){ return d})
+					                .attr("text-anchor", "left")
+					                .style("alignment-baseline", "middle")
+						svg.append("text")
+										//.attr("x", 870 + size*1.2)
+										//.attr("y", 100)
+										.attr("transform",
+											"translate(" + (890) + " ," +
+												         (130) + ")")
+										.style("text-anchor", "middle")
+										.style("font-size", "13px")
+										.style("font-weight", 700)
+										.text("Earthquake Frequency");
+
+						svg.append("text")
+								  .attr("x", width -80)
+								  .attr("y", height -10 )
+								  .attr("text-anchor", "middle")
+								  .style("font-size", "12px")
+								  .text("rpatro6");
+
+
+     };
+
+
+
+function update(){
+	console.log("error0")
+
+	console.log("error1")
+	//removing prior svg elements ie, clean up svg
+	//console.log(value)
+	d3.select('#chart1').selectAll("*").remove();
+	year = sliderTime.value().getFullYear().toString();//d3.text(d3.timeFormat('%Y')(sliderTime.value()))
+	console.log(year)
+	var svg = d3.select("#chart1").append("svg")
+							.attr("width", width)
+							.attr("height", height);
+console.log("error2")
+					//var stateNames = d3.map();
+	var projection = d3.geoAlbersUsa()
+											.translate([width / 2, height / 2]) // translate to center of screen
+											.scale([1000]); // scale things down so see entire US
+console.log("error3")
+						// Define path generator
+	var path = d3.geoPath() // path generator that will convert GeoJSON to SVG paths
+								.projection(projection); // tell path generator to use albersUsa projection
+console.log("error4")
+	//console.log(promises)
+	Promise.all(promises).then(ready)
+		function ready([us,d]) {
+			//console.log(us)
+console.log("error5")
+			var dataArray = [];
+			//console.log(data)
+			for (var i = 0; i < d.length; i++) {
+					//console.log(data[d]["2010"])
+					dataArray.push(parseFloat(d[i][year]))
+					}
+					//console.log(dataArray)
+			//console.log(dataArray)
+			var minVal = d3.min(dataArray)
+			//console.log(minVal)
+			var maxVal = d3.max(dataArray)
+			//console.log(maxVal)
+console.log("error6")
+			const logScale = d3.scaleLog()
+													.domain([1,maxVal])
+
+			const colorScaleLog = d3.scaleSequential(
+															(d) => d3.interpolateReds(logScale(d))
+															)
+			//LOG SCALE
+
+			// Grab data value
+			for (var i = 0; i < d.length; i++) {
+				var dataState = d[i]["States"];
+				var dataRegion = d[i]['Region'];
+				//console.log(dataState)
+				// Grab data value
+				var dataValue = +d[i][year]//,+d[i]['2011'],+d[i]['2012'],+d[i]['2013'],+d[i]['2014'],+d[i]['2015']];
+
+				// Find the corresponding state inside the GeoJSON
+				for (var j = 0; j < us.objects.states.geometries.length; j++) {
+
+					var jsonState = us.objects.states.geometries[j].properties.name;
+
+					if (dataState == jsonState) {
+
+						us.objects.states.geometries[j].properties.value = dataValue;
+						us.objects.states.geometries[j].properties.region = dataRegion;
+						//json.features[j].properties.value = dataValue;
+
+						// Stop looking through the JSON
+						break;
+					}
+				}
+			}
+			var tool_tip = d3.tip()
+										.attr("class", "d3-tip")
+										.offset([-3, 0])
+										.html(function(d) { return "State: " + d.properties.name +"<br/>"  +"Reqion: " + d.properties.region +"<br/>"  +	"Year: "+ year +"<br/>"  +"Earthquakes: " + d.properties.value ; });
+			svg.call(tool_tip);
+				//console.log(us)
+			svg.append("g")
+					.attr("class", "states")
+					.selectAll("path")
+					.data(topojson.feature(us, us.objects.states).features)
+					.enter().append("path")
+					.attr("d", path)
+					.style("fill", function(d) {
+						//if (d.properties.value[0]){
+						return colorScaleLog(d.properties.value) })
+						.on('mouseover', tool_tip.show)
+						.on('mouseout', tool_tip.hide);
+
+
+					//.append("title")
+					//.text(function(d) { return d["2010"] ; });
+					var size = 20
+					minlog = Math.log(1)
+					maxlog = Math.log(maxVal)
+					//console.log(maxlog )
+					function log_split(a, b) {
+								var result = [],
+										delta = (b - a) / (8);
+								while (a <b) {
+										result.push(a);
+										a += delta;
+								}
+								result.push(b);
+								console.log(result)
+								if (result.length > 9){
+										result.splice(8,1)
+								}
+								console.log(result)
+								return result;
+							};
+					var log_legend = log_split(minlog, maxlog)
+					//console.log(log_legend)
+					function antilog_floor(arr){
+						return arr.map(function(x){
+							return Math.floor(Math.pow(Math.E,x))
+						});
+					}
+					var log_domain = antilog_floor(log_legend)
+
+					//var log_domain=[1, 2, 5, 10, 30, 70, 180, 500, 1000]
+					svg.selectAll("legend")
+								.data(log_domain)
+									.enter()
+										.append("rect")
+											.attr("x", 870)
+											.attr("y", function(d,i){
+												//console.log(i)
+												 return 150 + i*(size+5)}) // 100 is where the first dot appears. 25 is the distance between dots
+											.attr("width", size)
+											.attr("height", size)
+											.style("fill", function(d){
+												//console.log(d)
+												return colorScaleLog(d)})
+
+											 // Add one dot in the legend for each name.
+					svg.selectAll("leglabel")
+									.data(log_domain)
+										.enter()
+											.append("text")
+												.attr("x", 870 + size*1.2)
+												.attr("y", function(d,i){ return 150 + i*(size+5) + (size/2)}) // 100 is where the first dot appears. 25 is the distance between dots
+												//.style("fill", function(d){ return color(d)})
+												.text(function(d){ return d})
+												.attr("text-anchor", "left")
+												.style("alignment-baseline", "middle")
+					svg.append("text")
+									//.attr("x", 870 + size*1.2)
+									//.attr("y", 100)
+									.attr("transform",
+										"translate(" + (890) + " ," +
+															 (130) + ")")
+									.style("text-anchor", "middle")
+									.style("font-size", "13px")
+									.text("Earthquake Frequency");
+
+					svg.append("text")
+								.attr("x", width -60)
+								.attr("y", height - 10   )
+								.attr("text-anchor", "middle")
+								.style("font-size", "16px")
+								.text("rpatro6");
+
+
+	 };
+}
+    </script>
+	</body>
+</html>
