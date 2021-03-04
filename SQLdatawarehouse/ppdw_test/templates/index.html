@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %} Main Menu {% endblock %}
+{% block heading %} Main Menu {% endblock %}
+{% block content %}
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">Store Count</th>
+        <th scope="col">Manufacturer Count</th>
+        <th scope="col">Product Count</th>
+        <th scope="col">Member Count</th>
+    </tr>
+    </thead>
+    <tbody>
+            <tr>
+                <td>{{val1}}</td>
+                <td>{{val2}}</td>
+                <td>{{val3}}</td>
+                <td>{{val4}}</td>
+            </tr>
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %} Membership Trends Report {% endblock %}
+{% block heading %} Membership Trends Report {% endblock %}
+{% block content %}
+   <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Year</th>
+            <th scope="col">Total Memberships for the year</th>
+            <th scope="col">Drill Down</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for row in value %}
+                <tr>
+                    <td>{{ row[0] }}</td>
+                    <td>{{ row[1] }}</td>
+                    <td><a href="{{ url_for('membership_by_year', year = row[0]) }}"><button type="button" class="btn btn-primary">Drill Down</button></a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

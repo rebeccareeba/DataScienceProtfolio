@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %} City {% endblock %}
+{% block heading %} City {% endblock %}
+{% block content %}
+
+
+
+        <p><b>City: &nbsp;</b> {{ row[0][1] }}</p>
+        <p><b>State: &nbsp;</b> {{ row[0][2] }}</p>
+        <p><b>Population: &nbsp;</b> {{ row[0][3] }}</p>
+        <hr />
+
+        <h2> Edit City </h2>
+
+        <form action="{{ url_for('city_details', city_id = row[0][0]) }}" method="POST">
+            <p><b>{{ form.population.label }}: </b> {{ form.population(value = row[0][3]) }} </p>
+
+            {{ form.csrf_token }}
+            {{ form.submit }}
+        </form>
+
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %} Revenue by Population Report {% endblock %}
+{% block heading %} Revenue by Population Report {% endblock %}
+{% block content %}
+   <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Year</th>
+            <th scope="col">Revenue In Small Cities</th>
+            <th scope="col">Revenue In Medium Cities</th>
+            <th scope="col">Revenue In Large Cities</th>
+            <th scope="col">Revenue In Extra Large Cities</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for row in value %}
+
+                    <tr>
+                        <td>{{ row[0] }}</td>
+                        <td>{{ row[1] }}</td>
+                        <td>{{ row[2] }}</td>
+                        <td>{{ row[3] }}</td>
+                        <td>{{ row[4] }}</td>
+                    </tr>
+
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

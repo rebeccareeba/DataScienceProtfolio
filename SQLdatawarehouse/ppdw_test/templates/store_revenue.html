@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %} Store Revenue by Year by State Report {% endblock %}
+{% block heading %} Store Revenue by Year by State Report {% endblock %}
+{% block content %}
+
+        <form action="{{ url_for('store_revenue') }}" method="POST">
+        <p><b>{{ form.state.label }}:  &nbsp;</b> {{ form.state }}</p>
+
+            {{ form.csrf_token }}
+            {{ form.submit }}
+        </form>
+
+{% endblock %}

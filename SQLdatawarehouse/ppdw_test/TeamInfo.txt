@@ -1,0 +1,17 @@
+Phase 3 TeamInfo | CS 6400 | Fall 2020 | Team 019
+
+All of the Team019 SQL can be found in files under the queries directory.
+
+queries/mainMenuQueries.py
+queries/manufacturerReport.py
+queries/categoryQueries.py
+queries/membershipTrendsReport.py
+queries/revenueByPopulation.py
+queries/cityQueries.py
+queries/holidayQueries.py
+queries/gps.py
+queries/ac_groundhogQueries.py
+queries/stateHighestVolumeCategory.py
+queries/categoryQueries.py
+queries/storeRevenueReport.py
+

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %} Holidays {% endblock %}
+{% block heading %} Holidays {% endblock %}
+{% block content %}
+
+    <a href="{{ url_for('add_holiday') }}">
+        <button type="button" class="btn btn-primary mb-4">Add Holiday</button></a>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Holiday Name</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for row in value %}
+
+                    <tr>
+                        <td>{{ row[0] }}</td>
+                        <td>{{ row[1] }}</td>
+                    </tr>
+
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

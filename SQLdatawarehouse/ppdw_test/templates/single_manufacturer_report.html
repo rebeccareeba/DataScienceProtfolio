@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %} Single Manufacturer Report {% endblock %}
+{% block heading %} {{ val1[0][1] }} Drill Down {% endblock %}
+{% block content %}
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Manufacturer Name</th>
+            <th scope="col">Max Discount</th>
+            <th scope="col">Product Count</th>
+            <th scope="col">Avg Retail</th>
+            <th scope="col">Min Retail</th>
+            <th scope="col">Max Retail</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for row in val1 %}
+                <tr>
+                    <td>{{row[1]}}</td>
+                    <td>{{row[2]}}</td>
+                    <td>{{row[3]}}</td>
+                    <td>{{row[4]}}</td>
+                    <td>{{row[5]}}</td>
+                    <td>{{row[6]}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Product ID</th>
+            <th scope="col">Product Name</th>
+            <th scope="col">Categories</th>
+            <th scope="col">Retail</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for row in val2 %}
+                <tr>
+                    <td>{{row[0]}}</td>
+                    <td>{{row[1]}}</td>
+                    <td>{{row[2]}}</td>
+                    <td>{{row[3]}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

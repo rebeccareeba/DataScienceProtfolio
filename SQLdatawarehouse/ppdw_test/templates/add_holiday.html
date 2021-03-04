@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %} Add Holiday {% endblock %}
+{% block heading %} Add Holiday {% endblock %}
+{% block content %}
+
+
+        <form action="{{ url_for('add_holiday') }}" method="POST">
+        <p><b>{{ form.holiday_date.label }}:  &nbsp;</b> {{ form.holiday_date(value = "") }}</p>
+        <p><b>{{ form.holiday_name.label }}: </b> {{ form.holiday_name(value = "") }}</p>
+
+            {{ form.csrf_token }}
+            {{ form.submit }}
+        </form>
+
+{% endblock %}

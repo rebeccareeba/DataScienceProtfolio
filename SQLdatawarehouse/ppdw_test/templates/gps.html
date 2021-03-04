@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %} Actual vs. Predicted Revenue for GPS category {% endblock %}
+{% block heading %} Actual vs. Predicted Revenue for GPS category  {% endblock %}
+{% block content %}
+   <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Product ID</th>
+            <th scope="col">Product Name</th>
+            <th scope="col">Retail Price</th>
+            <th scope="col">Units Ever Sold</th>
+            <th scope="col">Units Sold at Discount</th>
+            <th scope="col">Units Sold at Retail</th>
+            <th scope="col">Actual Revenue</th>
+            <th scope="col">Predicted Revenue</th>
+            <th scope="col">Predicted Revenue Differences</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for row in value %}
+
+                    <tr>
+                        <td>{{ row[0] }}</td>
+                        <td>{{ row[1] }}</td>
+                        <td>{{ row[2] }}</td>
+                        <td>{{ row[3] }}</td>
+                        <td>{{ row[4] }}</td>
+                        <td>{{ row[5] }}</td>
+                        <td>{{ row[6] }}</td>
+                        <td>{{ row[7] }}</td>
+                        <td>{{ row[8] }}</td>
+                    </tr>
+
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

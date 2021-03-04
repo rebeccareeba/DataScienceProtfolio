@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %} Air Conditioners on Groundhog Day {% endblock %}
+{% block heading %} Air Conditioners on Groundhog Day {% endblock %}
+{% block content %}
+   <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Year</th>
+            <th scope="col">AC Units Sold per year</th>
+            <th scope="col">Average AC Units Sold per day</th>
+            <th scope="col">AC Units Sold on Groundhog Day</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for row in value %}
+
+                    <tr>
+                        <td>{{ row[0] }}</td>
+                        <td>{{ row[1] }}</td>
+                        <td>{{ row[2] }}</td>
+                        <td>{{ row[3] }}</td>
+                    </tr>
+
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

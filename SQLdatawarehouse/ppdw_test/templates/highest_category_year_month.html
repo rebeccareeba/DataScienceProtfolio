@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %} State with Highest Volume for each Category {% endblock %}
+{% block heading %} State with Highest Volume for each Category {% endblock %}
+{% block content %}
+
+        <form action="{{ url_for('highest_category') }}" method="POST">
+       <p> <b>{{ form.year.label }}:  &nbsp;</b> {{ form.year }}</p>
+        <p><b>{{ form.month.label }}: </b> {{ form.month }}</p>
+
+            {{ form.csrf_token }}
+            {{ form.submit }}
+        </form>
+
+    <h2> {{ month }}/{{ year }}</h2>
+
+ <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Category</th>
+            <th scope="col">States with highest number of units sold</th>
+            <th scope="col">Number of Units Sold</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for row in value %}
+
+                    <tr>
+                        <td>{{ row[0] }}</td>
+                        <td>{{ row[1] }}</td>
+                        <td>{{ row[2] }}</td>
+                    </tr>
+
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+
+{% endblock %}

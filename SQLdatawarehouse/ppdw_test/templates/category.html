@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %} Category Report {% endblock %}
+{% block heading %} Category Report {% endblock %}
+{% block content %}
+   <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Category</th>
+            <th scope="col">Number of Products</th>
+            <th scope="col">Number of Manufacturers</th>
+            <th scope="col">Average Retail</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for row in value %}
+
+                    <tr>
+                        <td>{{ row[0] }}</td>
+                        <td>{{ row[1] }}</td>
+                        <td>{{ row[2] }}</td>
+                        <td>{{ row[3] }}</td>
+                    </tr>
+
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
